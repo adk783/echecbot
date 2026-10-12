@@ -1,6 +1,8 @@
 # Chess vs Bot
 
-Small local web app: play chess against Stockfish (WASM) at four difficulty levels (Easy, Intermediate, Hard, Impossible).
+Small local web app: play chess against Stockfish (WASM) at Elo-based levels from 400 to Max.
+
+Live: https://adk783.github.io/echecbot/
 
 Stack: Vite, TypeScript, chess.js (rules), Stockfish 19 lite single-threaded (engine, Web Worker, UCI).
 
@@ -23,11 +25,20 @@ Open http://localhost:5173.
 
 ## Difficulty
 
-Defined in `src/difficulty.ts`.
+Defined in `src/difficulty.ts`. Elo values are rough approximations of chess.com ratings, not a calibrated measure.
 
-| Level | Skill Level | Search | Random move |
+| Level | Engine strength | Search | Random move |
 | --- | --- | --- | --- |
-| Easy | 0 | depth 1 | 30% |
-| Intermediate | 6 | 300 ms | none |
-| Hard | 14 | 1000 ms | none |
-| Impossible | 20 | 2500 ms | none |
+| Elo 400 | Skill Level 0 | depth 1 | 45% |
+| Elo 600 | Skill Level 0 | depth 1 | 30% |
+| Elo 800 | Skill Level 0 | depth 2 | 18% |
+| Elo 1000 | Skill Level 1 | depth 3 | 10% |
+| Elo 1200 | Skill Level 3 | depth 4 | 5% |
+| Elo 1400 to 3000 (step 200) | `UCI_LimitStrength` + `UCI_Elo` | 1000 ms | none |
+| Max | Skill Level 20 (full strength) | 2500 ms | none |
+
+Stockfish's `UCI_Elo` cannot go below 1320, so levels under 1400 are emulated with a low skill level, a shallow search and random moves.
+
+## Bot avatar
+
+`public/bot-avatar.jpg`, shown above the board. Its card glows and shows "Thinking..." while the engine searches, then the move it played.

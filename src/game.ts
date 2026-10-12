@@ -1,6 +1,7 @@
 import { Chess, type Color, type Move, type Square } from 'chess.js';
 import { Board, type BoardPiece } from './board';
-import { type DifficultyLevel, getDifficultyConfig, pickRandomItem, shouldPlayRandomMove } from './difficulty';
+import { BotCard } from './botCard';
+import { DIFFICULTY_LEVELS, type DifficultyLevel, pickRandomItem, shouldPlayRandomMove } from './difficulty';
 import { Engine } from './engine';
 import { colorName, getGameStatus } from './gameStatus';
 
@@ -9,6 +10,7 @@ const AUTO_PROMOTION_PIECE = 'q';
 export interface GameElements {
   board: HTMLElement;
   status: HTMLElement;
+  botCard: HTMLElement;
 }
 
 interface BotMove {
@@ -22,9 +24,10 @@ export class Game {
   private chess = new Chess();
   private readonly board: Board;
   private readonly engine = new Engine();
+  private readonly botCard: BotCard;
   private readonly statusElement: HTMLElement;
   private playerColor: Color = 'w';
-  private level: DifficultyLevel = 'easy';
+  private level: DifficultyLevel = DIFFICULTY_LEVELS[0];
   private selected: Square | null = null;
   private lastMove: Move | null = null;
   private isBotThinking = false;
@@ -34,11 +37,13 @@ export class Game {
 
   constructor(elements: GameElements) {
     this.statusElement = elements.status;
+    this.botCard = new BotCard(elements.botCard);
     this.board = new Board(elements.board, (square) => this.handleSquareClick(square));
   }
 
   setLevel(level: DifficultyLevel): void {
     this.level = level;
+    this.botCard.setLevelLabel(level.label);
   }
 
   newGame(playerColor: Color): void {
@@ -49,6 +54,7 @@ export class Game {
     this.lastMove = null;
     this.isBotThinking = false;
     this.errorMessage = null;
+    this.botCard.clear();
     this.render();
     void this.playBotMoveIfNeeded();
   }
@@ -90,6 +96,7 @@ export class Game {
     }
     const currentGameId = this.gameId;
     this.isBotThinking = true;
+    this.botCard.showThinking();
     this.render();
     try {
       const move = await this.chooseBotMove();
@@ -97,25 +104,27 @@ export class Game {
         return;
       }
       this.lastMove = this.chess.move(move);
+      this.botCard.showMessage(`Played ${this.lastMove.san}`);
     } catch (error) {
       if (currentGameId !== this.gameId) {
         return;
       }
       console.error('Bot move failed', error);
       this.errorMessage = 'The engine failed to produce a legal move. Start a new game.';
+      this.botCard.clear();
     }
     this.isBotThinking = false;
     this.render();
   }
 
   private async chooseBotMove(): Promise<BotMove> {
-    const config = getDifficultyConfig(this.level);
+    const config = this.level.config;
     const legalMoves = this.chess.moves({ verbose: true });
     if (shouldPlayRandomMove(config.randomMoveChance)) {
       const random = pickRandomItem(legalMoves);
       return { from: random.from, to: random.to, promotion: random.promotion };
     }
-    const move = await this.engine.getBestMove(this.chess.fen(), this.level);
+    const move = await this.engine.getBestMove(this.chess.fen(), config);
     const isLegal = legalMoves.some((legal) => legal.from === move.from && legal.to === move.to);
     if (!isLegal) {
       throw new Error(`Engine move is not legal here: ${move.from}${move.to}`);

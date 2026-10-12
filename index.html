@@ -9,7 +9,7 @@
     <main class="app">
       <h1>Chess vs Bot</h1>
       <div class="controls">
-        <label>Difficulty <select id="level"></select></label>
+        <label>Level <select id="level"></select></label>
         <label>
           Play as
           <select id="color">
@@ -19,8 +19,26 @@
         </label>
         <button id="new-game" type="button">New game</button>
       </div>
+      <section class="table" aria-label="Game">
+        <div id="bot-card" class="player-card bot-card">
+          <div class="avatar-frame">
+            <img class="avatar" alt="Bot" width="72" height="72" />
+          </div>
+          <div class="player-info">
+            <span class="player-name">Bot</span>
+            <span class="player-level"></span>
+          </div>
+          <p class="bubble" aria-live="polite" hidden></p>
+        </div>
+        <div id="board" class="board"></div>
+        <div class="player-card you-card">
+          <div class="avatar-frame you-avatar" aria-hidden="true">You</div>
+          <div class="player-info">
+            <span class="player-name">You</span>
+          </div>
+        </div>
+      </section>
       <p id="status" class="status" role="status" aria-live="polite"></p>
-      <div id="board" class="board"></div>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

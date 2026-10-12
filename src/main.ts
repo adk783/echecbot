@@ -1,13 +1,6 @@
 import './style.css';
-import { DIFFICULTY_LEVELS, type DifficultyLevel } from './difficulty';
+import { DIFFICULTY_LEVELS, findDifficultyLevel } from './difficulty';
 import { Game } from './game';
-
-const LEVEL_LABELS: Record<DifficultyLevel, string> = {
-  easy: 'Easy',
-  intermediate: 'Intermediate',
-  hard: 'Hard',
-  impossible: 'Impossible',
-};
 
 function requireElement<T extends HTMLElement>(id: string): T {
   const element = document.getElementById(id);
@@ -22,16 +15,20 @@ const colorSelect = requireElement<HTMLSelectElement>('color');
 const newGameButton = requireElement<HTMLButtonElement>('new-game');
 
 for (const level of DIFFICULTY_LEVELS) {
-  levelSelect.add(new Option(LEVEL_LABELS[level], level));
+  levelSelect.add(new Option(level.label, level.id));
 }
 
-const game = new Game({ board: requireElement('board'), status: requireElement('status') });
+const game = new Game({
+  board: requireElement('board'),
+  status: requireElement('status'),
+  botCard: requireElement('bot-card'),
+});
 
 function startGame(): void {
-  game.setLevel(levelSelect.value as DifficultyLevel);
+  game.setLevel(findDifficultyLevel(levelSelect.value));
   game.newGame(colorSelect.value === 'b' ? 'b' : 'w');
 }
 
-levelSelect.addEventListener('change', () => game.setLevel(levelSelect.value as DifficultyLevel));
+levelSelect.addEventListener('change', () => game.setLevel(findDifficultyLevel(levelSelect.value)));
 newGameButton.addEventListener('click', startGame);
 startGame();

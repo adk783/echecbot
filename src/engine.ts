@@ -1,4 +1,4 @@
-import { type DifficultyLevel, buildGoCommand, getDifficultyConfig } from './difficulty';
+import { type DifficultyConfig, buildGoCommand, buildStrengthCommands } from './difficulty';
 import { parseBestMoveLine, parseUciMove, type UciMove } from './uci';
 
 const ENGINE_URL = `${import.meta.env.BASE_URL}stockfish/stockfish-19-lite-single.js`;
@@ -21,8 +21,8 @@ export class Engine {
   }
 
   /** Asks the engine for its move in the given position at the given difficulty. */
-  getBestMove(fen: string, level: DifficultyLevel): Promise<UciMove> {
-    const task = this.queue.then(() => this.search(fen, level));
+  getBestMove(fen: string, config: DifficultyConfig): Promise<UciMove> {
+    const task = this.queue.then(() => this.search(fen, config));
     this.queue = task.catch(() => undefined);
     return task;
   }
@@ -31,10 +31,9 @@ export class Engine {
     this.worker.terminate();
   }
 
-  private async search(fen: string, level: DifficultyLevel): Promise<UciMove> {
+  private async search(fen: string, config: DifficultyConfig): Promise<UciMove> {
     await this.ensureReady();
-    const config = getDifficultyConfig(level);
-    this.send(`setoption name Skill Level value ${config.skillLevel}`);
+    buildStrengthCommands(config.strength).forEach((command) => this.send(command));
     this.send(`position fen ${fen}`);
     const bestMoveLine = this.waitForLine((line) => parseBestMoveLine(line) !== null);
     this.send(buildGoCommand(config.search));

@@ -19,10 +19,17 @@ export interface BoardView {
 const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 const RANKS = ['8', '7', '6', '5', '4', '3', '2', '1'];
 
-const GLYPHS: Record<Color, Record<PieceSymbol, string>> = {
-  w: { k: '♔', q: '♕', r: '♖', b: '♗', n: '♘', p: '♙' },
-  b: { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' },
+/** Same solid glyph for both colors (styled by CSS); U+FE0E forces text rendering, never emoji. */
+const TEXT_PRESENTATION = '︎';
+const GLYPHS: Record<PieceSymbol, string> = {
+  k: '♚',
+  q: '♛',
+  r: '♜',
+  b: '♝',
+  n: '♞',
+  p: '♟',
 };
+const LAST_INDEX = 7;
 
 /** Renders the 8x8 board and reports square clicks. Holds no game state. */
 export class Board {
@@ -48,7 +55,9 @@ export class Board {
       ...ranks.flatMap((rank, row) =>
         files.map((file, column) => {
           const square = `${file}${rank}` as Square;
-          return this.createCell(square, (row + column) % 2 === 0, pieceBySquare.get(square), view);
+          const cell = this.createCell(square, (row + column) % 2 === 0, pieceBySquare.get(square), view);
+          this.addCoordinates(cell, column === 0 ? rank : null, row === LAST_INDEX ? file : null);
+          return cell;
         }),
       ),
     );
@@ -81,9 +90,26 @@ export class Board {
     if (piece) {
       const glyph = document.createElement('span');
       glyph.className = `piece piece-${piece.color}`;
-      glyph.textContent = GLYPHS[piece.color][piece.type];
+      glyph.textContent = GLYPHS[piece.type] + TEXT_PRESENTATION;
       cell.append(glyph);
     }
     return cell;
+  }
+
+  private addCoordinates(cell: HTMLElement, rankLabel: string | null, fileLabel: string | null): void {
+    if (rankLabel !== null) {
+      cell.append(this.createCoordinate('coord-rank', rankLabel));
+    }
+    if (fileLabel !== null) {
+      cell.append(this.createCoordinate('coord-file', fileLabel));
+    }
+  }
+
+  private createCoordinate(className: string, text: string): HTMLElement {
+    const label = document.createElement('span');
+    label.className = `coord ${className}`;
+    label.setAttribute('aria-hidden', 'true');
+    label.textContent = text;
+    return label;
   }
 }
