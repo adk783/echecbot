@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chess vs Bot</title>
+  </head>
+  <body>
+    <main class="app">
+      <h1>Chess vs Bot</h1>
+      <div class="controls">
+        <label>Difficulty <select id="level"></select></label>
+        <label>
+          Play as
+          <select id="color">
+            <option value="w">White</option>
+            <option value="b">Black</option>
+          </select>
+        </label>
+        <button id="new-game" type="button">New game</button>
+      </div>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <div id="board" class="board"></div>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
