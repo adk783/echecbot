@@ -42,3 +42,9 @@ Stockfish's `UCI_Elo` cannot go below 1320, so levels under 1400 are emulated wi
 ## Bot avatar
 
 `public/bot-avatar.jpg`, shown above the board. Its card glows and shows "Thinking..." while the engine searches, then the move it played.
+
+## Win chances
+
+The bar under the board shows your win, draw and loss chances after every move. A second Stockfish instance at full strength evaluates each position for 1 second with `UCI_ShowWDL` and reports win/draw/loss in per mille (`src/winChance.ts`, `src/winChanceTracker.ts`). Finished games show the exact result.
+
+These chances come from Stockfish's WDL model, fitted on engine games: they assume both sides keep playing at engine level, so they do not account for the gap between you and the bot, and draws weigh heavily in balanced positions.

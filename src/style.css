@@ -6,13 +6,16 @@
   --muted: #a9b0bc;
   --accent: #4c9aff;
   --thinking: #ffb547;
+  --win: #81b64c;
+  --draw: #8a919e;
+  --loss: #e5534b;
   --light-square: #eeeed2;
   --dark-square: #769656;
   --last-move: rgba(255, 221, 0, 0.45);
   --selected: rgba(80, 160, 255, 0.55);
   --check: rgba(230, 40, 40, 0.65);
   /* Fits the whole table (cards + board) in the viewport on arrival. */
-  --board-size: max(280px, min(92vw, 560px, calc(100svh - 370px)));
+  --board-size: max(280px, min(92vw, 560px, calc(100svh - 430px)));
   --square-size: calc(var(--board-size) / 8);
   --avatar-size: 72px;
 }
@@ -189,6 +192,61 @@ button {
   }
 }
 
+/* Win chances */
+
+.win-chance {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: opacity 200ms ease;
+}
+
+.win-chance.is-pending {
+  opacity: 0.55;
+}
+
+.win-chance.is-unavailable {
+  opacity: 0.3;
+}
+
+.win-legend {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.win-legend strong {
+  color: var(--text);
+}
+
+.win-bar {
+  display: flex;
+  height: 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--draw);
+}
+
+.segment {
+  flex: 1 1 0;
+  min-width: 0;
+  transition: flex-grow 400ms ease;
+}
+
+.segment-win {
+  background: var(--win);
+}
+
+.segment-draw {
+  background: var(--draw);
+}
+
+.segment-loss {
+  background: var(--loss);
+}
+
 /* Board */
 
 .board {
@@ -308,7 +366,9 @@ button {
     animation: none;
   }
 
-  .avatar-frame {
+  .avatar-frame,
+  .segment,
+  .win-chance {
     transition: none;
   }
 }

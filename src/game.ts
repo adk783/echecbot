@@ -4,6 +4,8 @@ import { BotCard } from './botCard';
 import { DIFFICULTY_LEVELS, type DifficultyLevel, pickRandomItem, shouldPlayRandomMove } from './difficulty';
 import { Engine } from './engine';
 import { colorName, getGameStatus } from './gameStatus';
+import { WinBar } from './winBar';
+import { WinChanceTracker } from './winChanceTracker';
 
 const AUTO_PROMOTION_PIECE = 'q';
 
@@ -11,6 +13,7 @@ export interface GameElements {
   board: HTMLElement;
   status: HTMLElement;
   botCard: HTMLElement;
+  winChance: HTMLElement;
 }
 
 interface BotMove {
@@ -25,6 +28,7 @@ export class Game {
   private readonly board: Board;
   private readonly engine = new Engine();
   private readonly botCard: BotCard;
+  private readonly winChance: WinChanceTracker;
   private readonly statusElement: HTMLElement;
   private playerColor: Color = 'w';
   private level: DifficultyLevel = DIFFICULTY_LEVELS[0];
@@ -38,6 +42,7 @@ export class Game {
   constructor(elements: GameElements) {
     this.statusElement = elements.status;
     this.botCard = new BotCard(elements.botCard);
+    this.winChance = new WinChanceTracker(new WinBar(elements.winChance));
     this.board = new Board(elements.board, (square) => this.handleSquareClick(square));
   }
 
@@ -56,6 +61,7 @@ export class Game {
     this.errorMessage = null;
     this.botCard.clear();
     this.render();
+    this.trackWinChance();
     void this.playBotMoveIfNeeded();
   }
 
@@ -87,7 +93,17 @@ export class Game {
     this.selected = null;
     this.errorMessage = null;
     this.render();
+    this.trackWinChance();
     void this.playBotMoveIfNeeded();
+  }
+
+  private trackWinChance(): void {
+    this.winChance.update({
+      fen: this.chess.fen(),
+      sideToMove: this.chess.turn(),
+      status: getGameStatus(this.chess).kind,
+      perspective: this.playerColor,
+    });
   }
 
   private async playBotMoveIfNeeded(): Promise<void> {
@@ -105,6 +121,7 @@ export class Game {
       }
       this.lastMove = this.chess.move(move);
       this.botCard.showMessage(`Played ${this.lastMove.san}`);
+      this.trackWinChance();
     } catch (error) {
       if (currentGameId !== this.gameId) {
         return;

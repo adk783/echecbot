@@ -51,6 +51,9 @@ const MAX_LEVEL_ID = 'max';
 const MAX_SKILL_LEVEL = 20;
 const MAX_MOVE_TIME_MS = 2500;
 
+/** The engine at its real strength, without any handicap. */
+export const FULL_STRENGTH: EngineStrength = { kind: 'skill', skillLevel: MAX_SKILL_LEVEL };
+
 const NO_RANDOM_MOVES = 0;
 
 function eloLabel(elo: number): string {
@@ -93,7 +96,7 @@ const MAX_LEVEL: DifficultyLevel = {
   id: MAX_LEVEL_ID,
   label: 'Max',
   config: {
-    strength: { kind: 'skill', skillLevel: MAX_SKILL_LEVEL },
+    strength: FULL_STRENGTH,
     search: { kind: 'movetime', value: MAX_MOVE_TIME_MS },
     randomMoveChance: NO_RANDOM_MOVES,
   },

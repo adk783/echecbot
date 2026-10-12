@@ -22,6 +22,7 @@ const game = new Game({
   board: requireElement('board'),
   status: requireElement('status'),
   botCard: requireElement('bot-card'),
+  winChance: requireElement('win-chance'),
 });
 
 function startGame(): void {
